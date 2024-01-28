@@ -9,5 +9,5 @@ import org.springframework.web.bind.annotation.RestController
 class HelloWorldController {
 
   @GetMapping
-  fun helloWorld() = "This is Spartaaaaaa! Get ready for the fight..."
+  fun helloWorld() = "Created this just to test the mapping of the controller"
 }

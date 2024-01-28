@@ -3,44 +3,35 @@ package com.sample.invoice.sampleinvoice.service
 import com.sample.invoice.sampleinvoice.model.Invoice
 import com.sample.invoice.sampleinvoice.model.InvoiceStatus
 import com.sample.invoice.sampleinvoice.repository.InvoiceRepository
-import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Service
 class InvoiceService(
-    private val invoiceRepository: InvoiceRepository,
-    private val emailService: EmailService // Assume an EmailService for notification
+  private val invoiceRepository: InvoiceRepository,
+  private val emailService: EmailService // TODO : enhancement, create a notification service
 ) {
-  suspend fun getAllInvoices(): List<Invoice> = coroutineScope {
-    invoiceRepository.findAll()
-  }
+  fun getAllInvoices(): List<Invoice> = invoiceRepository.findAll()
 
-  suspend fun getInvoiceById(id: Long): Invoice? = coroutineScope {
-    invoiceRepository.findById(id).orElse(null)
-  }
+  fun getInvoiceById(id: Long): Invoice? = invoiceRepository.findById(id).orElse(null)
 
-  suspend fun createInvoice(invoice: Invoice): Invoice = coroutineScope {
+  fun createInvoice(invoice: Invoice): Invoice {
     val createdInvoice = invoiceRepository.save(invoice)
     emailService.sendInvoiceNotification(createdInvoice)
-    createdInvoice
+    return createdInvoice
   }
 
-  suspend fun updateInvoice(id: Long, updatedInvoice: Invoice): Invoice = coroutineScope {
+  fun updateInvoice(id: Long, updatedInvoice: Invoice): Invoice {
     require(id == updatedInvoice.id) { "Invoice ID in the path and the body must be same" }
     val updated = invoiceRepository.save(updatedInvoice)
     emailService.sendInvoiceUpdateNotification(updated)
-    updated
+    return updated
   }
 
-  suspend fun deleteInvoice(id: Long) {
-    coroutineScope {
-      invoiceRepository.deleteById(id)
-    }
-  }
+  fun deleteInvoice(id: Long) = invoiceRepository.deleteById(id)
 
-  suspend fun getOverdueInvoices(): List<Invoice> = coroutineScope {
+  fun getOverdueInvoices(): List<Invoice> {
     val currentDate = LocalDate.now()
-    invoiceRepository.findAllByDueDateBeforeAndStatus(currentDate, InvoiceStatus.PENDING)
+    return invoiceRepository.findAllByDueDateBeforeAndStatus(currentDate, InvoiceStatus.PENDING)
   }
 }

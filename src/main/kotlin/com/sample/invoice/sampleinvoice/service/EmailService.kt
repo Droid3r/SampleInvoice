@@ -7,11 +7,11 @@ import org.springframework.stereotype.Service
 class EmailService {
 
   fun sendInvoiceNotification(invoice: Invoice) {
-    //TODO
+
   }
 
   fun sendInvoiceUpdateNotification(invoice: Invoice) {
-    //TODO
+
   }
 
 }

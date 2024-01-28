@@ -25,10 +25,9 @@ dependencies {
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("com.h2database:h2:2.2.224")
-	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.7.3")
-	implementation("org.reactivestreams:reactive-streams:1.0.0")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("io.mockk:mockk:1.10.4")
+
 }
 
 tasks.withType<KotlinCompile> {

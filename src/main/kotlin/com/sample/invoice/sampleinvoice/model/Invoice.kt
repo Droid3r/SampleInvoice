@@ -1,15 +1,16 @@
 package com.sample.invoice.sampleinvoice.model
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.sample.invoice.sampleinvoice.billing.BillingStrategy
+import com.sample.invoice.sampleinvoice.model.tariff.TariffPlan
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
-import jakarta.persistence.Embeddable
-import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import java.time.LocalDate
 
@@ -19,11 +20,12 @@ data class Invoice(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @Column(nullable = false, unique = true)
-    val invoiceNumber: String,
-
     @Column
     val status: InvoiceStatus = InvoiceStatus.PENDING,
+
+    val energyConsumed: Double,
+
+    val totalAmount: Double,
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(nullable = false)
@@ -33,21 +35,16 @@ data class Invoice(
     @Column(nullable = false)
     val dueDate: LocalDate,
 
-    @Embedded
-    val client: Client,
+    val customerName: String,
+
+    @ManyToOne
+    @JoinColumn(name = "tariff_plan_id")
+    val tariffPlan: TariffPlan,
+
+    @Transient
+    val billingStrategy: BillingStrategy,
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     @JoinColumn(name = "invoice_id")
-    val items: List<InvoiceItem>
-)
-
-@Embeddable
-data class Client(
-    val name: String,
-    val address: String,
-
-    @Column(nullable = false)
-    val contactEmail: String,
-
-    val contactPhone: String
+    val invoiceItems: List<InvoiceItem>
 )
