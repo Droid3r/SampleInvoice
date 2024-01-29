@@ -40,6 +40,12 @@ class CustomerService(
     return customerRepository.save(customer)
   }
 
+  fun updateCustomerEnergyUsage(customerId: Long, newUsage: Double): Customer {
+    val existingCustomer = getCustomerById(customerId)
+    existingCustomer.updateEnergyUsage(newUsage)
+    return customerRepository.save(existingCustomer)
+  }
+
   fun deleteCustomer(customerId: Long) {
     getCustomerById(customerId)
     customerRepository.deleteById(customerId)

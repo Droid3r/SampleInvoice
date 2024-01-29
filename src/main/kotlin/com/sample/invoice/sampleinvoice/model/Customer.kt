@@ -19,8 +19,13 @@ data class Customer(
 
   @Column(nullable = false)
   val email: String,
+  var energyUsage: Double = 0.0,
 
   @ManyToOne(cascade = [CascadeType.PERSIST])
   @JoinColumn(name = "tariff_plan_id")
   val tariffPlan: TariffPlan
-)
+) {
+  fun updateEnergyUsage(newUsage: Double) {
+    this.energyUsage = newUsage
+  }
+}

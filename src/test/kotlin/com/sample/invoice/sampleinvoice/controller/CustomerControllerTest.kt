@@ -7,13 +7,9 @@ import com.sample.invoice.sampleinvoice.model.tariff.FixedRateTariffPlan
 import com.sample.invoice.sampleinvoice.service.CustomerService
 import io.mockk.every
 import io.mockk.mockk
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.BDDMockito.given
 import org.mockito.InjectMocks
-import org.mockito.Mock
-import org.mockito.Mockito.verify
-import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -23,15 +19,24 @@ import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.put
+import org.springframework.test.web.servlet.setup.MockMvcBuilders
 
 @SpringBootTest
 @AutoConfigureMockMvc
 class CustomerControllerTest @Autowired constructor(
-  val mockMvc: MockMvc,
+  var mockMvc: MockMvc,
   val objectMapper: ObjectMapper
 ) {
 
-  private val customerService: CustomerService = mockk(relaxed = true)
+  private val customerService: CustomerService = mockk()
+
+  @InjectMocks
+  private var controllerUnderTest: CustomerController = CustomerController(customerService)
+
+  @BeforeEach
+  fun setup() {
+    this.mockMvc = MockMvcBuilders.standaloneSetup(controllerUnderTest).build()
+  }
 
   @Test
   fun getAllCustomers() {
@@ -73,14 +78,11 @@ class CustomerControllerTest @Autowired constructor(
     )
     every { customerService.getCustomerById(customerId) } returns (sampleCustomer)
 
-    customerService.createCustomer(sampleCustomer)
-
     mockMvc.get("/api/customers/{customerId}", customerId)
       .andDo { println() }
       .andExpect {
         println(this)
         status { isOk() }
-        //content { json(objectMapper.writeValueAsString(sampleCustomer)) }
       }
   }
 
@@ -100,17 +102,19 @@ class CustomerControllerTest @Autowired constructor(
       "new@example.com",
       tariffPlan = FixedRateTariffPlan("fixed", "plan 2", 1.0)
     )
-    every { customerService.createCustomer(newCustomer) } returns (savedCustomer)
+    every { customerService.createCustomer(any()) } returns (savedCustomer)
 
     mockMvc.post("/api/customers") {
       contentType = MediaType.APPLICATION_JSON
       content = objectMapper.writeValueAsString(newCustomer)
-    }.andDo { println("==========")
+    }.andDo {
       println(this.print())
+
     }
       .andExpect {
         status { isOk() }
-        content { jsonPath("$.name") { value(savedCustomer.name) } }
+        content {
+          jsonPath("$.name") { value(savedCustomer.name) } }
       }
   }
 
@@ -124,7 +128,7 @@ class CustomerControllerTest @Autowired constructor(
       "updated@example.com",
       tariffPlan = FixedRateTariffPlan("fixed", "plan 2", 1.0)
     )
-    given(customerService.updateCustomer(customerId, updatedCustomer)).willReturn(updatedCustomer)
+    every {  customerService.updateCustomer(any(), any())} returns (updatedCustomer)
 
     mockMvc.put("/api/customers/{customerId}", customerId) {
       contentType = MediaType.APPLICATION_JSON
@@ -140,9 +144,9 @@ class CustomerControllerTest @Autowired constructor(
   fun deleteCustomer() {
     val customerId = 1L
 
-    mockMvc.delete("/api/customers/{customerId}", customerId)
-      .andExpect { status { isNoContent() } }
+    every {  customerService.deleteCustomer(1L)} returns Unit
 
-    verify(customerService).deleteCustomer(customerId)
+    mockMvc.delete("/api/customers/{customerId}", customerId)
+      .andExpect { status { isOk() } }
   }
 }

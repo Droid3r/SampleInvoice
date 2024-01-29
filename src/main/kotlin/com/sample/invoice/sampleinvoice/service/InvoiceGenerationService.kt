@@ -58,7 +58,7 @@ class InvoiceGenerationService(
   }
 
   private fun calculateEnergyConsumedForCustomer(customerId: Long): Double {
-    return 100.0 //TODO add consumption to DB linked to each customer
+    return getCustomerById(customerId).energyUsage
   }
 
   private fun getBillingStrategyForTariffPlan(tariffPlan: TariffPlan): BillingStrategy {
